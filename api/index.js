@@ -17,7 +17,7 @@ async function initWasm() {
 	photon.setWasm(photonInstance.exports); // need patch
 }
 
-initWasm()
+initWasm();
 
 const OUTPUT_FORMATS = {
 	jpeg: 'image/jpeg',
@@ -36,7 +36,7 @@ const inWhiteList = (env, url) => {
 
 const processImage = async (env, request, inputImage, pipeAction) => {
 	const [action, options = ''] = pipeAction.split('!');
-	const params = options.split(',');
+	const params = options.split(',').map((it) => (it ? it : null));
 	if (multipleImageMode.includes(action)) {
 		const image2 = params.shift(); // 是否需要 decodeURIComponent ?
 		if (image2 && inWhiteList(env, image2)) {
@@ -53,9 +53,8 @@ const processImage = async (env, request, inputImage, pipeAction) => {
 	}
 };
 
-
 export default async function handler(request) {
-	const env = process.env
+	const env = process.env;
 
 	// 入参提取与校验
 	const query = queryString.parse(new URL(request.url).search);
@@ -80,7 +79,7 @@ export default async function handler(request) {
 	}
 
 	// 目标图片获取与检查
-	request.headers.delete('host')
+	request.headers.delete('host');
 	const imageRes = await fetch(url, { headers: request.headers });
 	if (!imageRes.ok) {
 		return imageRes;
@@ -105,14 +104,14 @@ export default async function handler(request) {
 		// 图片编码
 		let outputImageData;
 		if (format === 'jpeg' || format === 'jpg') {
-			outputImageData = outputImage.get_bytes_jpeg(quality)
+			outputImageData = outputImage.get_bytes_jpeg(quality);
 		} else if (format === 'png') {
-			outputImageData = outputImage.get_bytes()
+			outputImageData = outputImage.get_bytes();
 		} else {
 			outputImageData = await optimizeImage({
 				image: outputImage.get_bytes(),
-				quality
-			})
+				quality,
+			});
 		}
 		console.log('create outputImageData done');
 
